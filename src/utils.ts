@@ -1,5 +1,11 @@
-import type { AppState, SupplyItem } from './types';
-import { CHECK_REMINDER_DAYS, EXPIRING_SOON_DAYS } from './types';
+import type { AppState, HouseholdProfile, SupplyItem } from './types';
+import {
+  BACKUP_REMINDER_DAYS,
+  CHECK_REMINDER_DAYS,
+  EXPIRING_SOON_DAYS,
+  GRAB_BAG_WEIGHT_BONUS,
+  PRIORITY_WEIGHTS,
+} from './types';
 
 export function effectiveRequired(
   item: SupplyItem,
@@ -23,6 +29,18 @@ export function isUnderstocked(
   return item.qtyInStock < effectiveRequired(item, people, days);
 }
 
+export function qtyNeeded(
+  item: SupplyItem,
+  people: number,
+  days: number,
+): number {
+  return roundQty(Math.max(0, effectiveRequired(item, people, days) - item.qtyInStock));
+}
+
+export function itemWeight(item: SupplyItem): number {
+  return PRIORITY_WEIGHTS[item.priority] + (item.grabBag ? GRAB_BAG_WEIGHT_BONUS : 0);
+}
+
 export function daysUntilExpiry(expiryDate: string | null, now = new Date()): number | null {
   if (!expiryDate) return null;
   const exp = new Date(expiryDate + 'T00:00:00');
@@ -36,9 +54,13 @@ export function isExpired(item: SupplyItem, now = new Date()): boolean {
   return d !== null && d < 0;
 }
 
-export function isExpiringSoon(item: SupplyItem, now = new Date()): boolean {
+export function isExpiringSoon(
+  item: SupplyItem,
+  now = new Date(),
+  withinDays = EXPIRING_SOON_DAYS,
+): boolean {
   const d = daysUntilExpiry(item.expiryDate, now);
-  return d !== null && d >= 0 && d <= EXPIRING_SOON_DAYS;
+  return d !== null && d >= 0 && d <= withinDays;
 }
 
 export function readinessStats(state: AppState) {
@@ -52,25 +74,48 @@ export function readinessStats(state: AppState) {
       expired: 0,
       expiringSoon: 0,
       percent: 0,
+      weightTotal: 0,
+      weightStocked: 0,
+      criticalGaps: [] as SupplyItem[],
     };
   }
   let fullyStocked = 0;
   let shortfalls = 0;
   let expired = 0;
   let expiringSoon = 0;
+  let weightTotal = 0;
+  let weightStocked = 0;
+  const criticalGaps: SupplyItem[] = [];
+
   for (const item of state.items) {
-    if (isUnderstocked(item, people, days)) shortfalls += 1;
-    else fullyStocked += 1;
+    const w = itemWeight(item);
+    weightTotal += w;
+    const under = isUnderstocked(item, people, days);
+    if (under) {
+      shortfalls += 1;
+      if (item.priority === 'high') criticalGaps.push(item);
+    } else {
+      fullyStocked += 1;
+      weightStocked += w;
+    }
     if (isExpired(item)) expired += 1;
     else if (isExpiringSoon(item)) expiringSoon += 1;
   }
+
+  criticalGaps.sort(
+    (a, b) => itemWeight(b) - itemWeight(a) || a.name.localeCompare(b.name),
+  );
+
   return {
     total,
     fullyStocked,
     shortfalls,
     expired,
     expiringSoon,
-    percent: Math.round((fullyStocked / total) * 100),
+    percent: weightTotal > 0 ? Math.round((weightStocked / weightTotal) * 100) : 0,
+    weightTotal,
+    weightStocked,
+    criticalGaps: criticalGaps.slice(0, 5),
   };
 }
 
@@ -80,6 +125,21 @@ export function needsCheckReminder(lastCheckedAt: string | null, now = new Date(
   if (Number.isNaN(last.getTime())) return true;
   const days = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
   return days >= CHECK_REMINDER_DAYS;
+}
+
+export function needsBackupReminder(
+  lastExportedAt: string | null,
+  now = new Date(),
+): boolean {
+  if (!lastExportedAt) return true;
+  const last = new Date(lastExportedAt);
+  if (Number.isNaN(last.getTime())) return true;
+  const days = (now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24);
+  return days >= BACKUP_REMINDER_DAYS;
+}
+
+export function isProfileActive(profile: HouseholdProfile): boolean {
+  return profile.infants || profile.schoolAge || profile.pets || profile.medical;
 }
 
 export function formatDate(iso: string | null): string {

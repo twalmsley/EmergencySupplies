@@ -1,9 +1,19 @@
-import type { Category, ItemPriority, SupplyItem } from '../types';
+import type {
+  Category,
+  HouseholdProfile,
+  ItemPriority,
+  SupplyItem,
+} from '../types';
+import { isProfileActive } from '../utils';
 import { slugId } from './defaults';
 
-export type SeedItem = Omit<SupplyItem, 'id' | 'categoryId' | 'priority'> & {
+export type SeedItem = Omit<
+  SupplyItem,
+  'id' | 'categoryId' | 'priority' | 'storageLocation'
+> & {
   categoryName: string;
   priority?: ItemPriority;
+  storageLocation?: string;
 };
 
 /** Essentials drawn from UK Be Ready + British Red Cross guidance. */
@@ -553,14 +563,33 @@ export function seedToItems(seed: SeedItem[], categories: Category[]): SupplyIte
     if (!categoryId) {
       throw new Error(`Missing category: ${s.categoryName}`);
     }
-    const { categoryName: _, priority, ...rest } = s;
+    const { categoryName: _, priority, storageLocation, ...rest } = s;
     return {
       ...rest,
       id: newId(),
       categoryId,
       priority: priority ?? defaultSeedPriority(s),
+      storageLocation: storageLocation ?? '',
     };
   });
+}
+
+/** When profile is inactive, return all seeds. When active, drop Baby/Pet unless opted in. */
+export function filterSeedForProfile(
+  seed: SeedItem[],
+  profile: HouseholdProfile,
+): SeedItem[] {
+  if (!isProfileActive(profile)) return seed;
+  return seed.filter((item) => {
+    if (item.categoryName === 'Baby') return profile.infants;
+    if (item.categoryName === 'Pet') return profile.pets;
+    return true;
+  });
+}
+
+export function seedItemsForCategories(categoryNames: string[]): SeedItem[] {
+  const set = new Set(categoryNames.map((n) => n.toLowerCase()));
+  return SEED_ITEMS.filter((s) => set.has(s.categoryName.toLowerCase()));
 }
 
 function defaultSeedPriority(item: SeedItem): ItemPriority {

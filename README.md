@@ -11,21 +11,20 @@ Aligned with public UK preparedness guidance from [Be Ready](https://beready.cam
 ## Features
 
 - Editable household size (**N**) and readiness horizon (**M days**)
-- Categorised item list: name, category, **priority** (high/medium/low), unit, quantity required (with optional N/M scaling), quantity in stock, expiry date, notes, grab-bag flag
-- Custom in-app confirmation dialogs for destructive actions (no browser `confirm`)
-- Default categories: Food, Drinks, Medical, Hygiene, Power, Heat+Light, Communications, Money, Baby, Pet, Documents (fully editable)
-- **Preseed essentials** from Be Ready / Red Cross–inspired catalogue (merge missing items, or replace all)
-- Sortable columns; search; filters for shopping list, expired, expiring soon, grab bag
-- Readiness summary (% of items fully stocked for N×M)
-- Six-month kit-check reminder
-- Emergency contacts and multiple household **notes** (add / edit / delete)
-- Collapsible Categories, Contacts, and Notes side panels (collapsed by default)
-- Icon action buttons with tooltips
-- JSON export / import (validated; backup downloaded before import)
-- PDF export of the **currently sorted/filtered** list; print stylesheet fallback
-- Light / dark / system theme
-- Progressive Web App (installable, works offline after first visit)
-- In-app **Help** and **Advice** (no power/water/gas, summer/winter, staying warm, cold food, portable cookers, water purification & storage)
+- Optional household **profile** (infants, school-age, pets, medical) to tailor preseed and Advice
+- Categorised item list: name, category, **priority**, unit, quantity required (optional N/M scaling), stock, expiry, **storage location**, notes, grab-bag flag
+- Inline stock **+/−** and mark-fully-stocked; custom confirms for deletes
+- Default categories: Food, Drinks, Medical, Hygiene, Power, Heat+Light, Communications, Money, Baby, Pet, Documents (editable)
+- **Preseed essentials** (merge / replace); Advice can add missing essentials per scenario
+- Sortable columns; search; filters for understocked, expired, expiring soon, grab bag, location
+- Dedicated **Shopping** and **Grab-bag packing** modes with their own PDF/print layouts
+- **Weighted readiness** score (priority + grab-bag aware) with critical-gap summary
+- Six-month kit-check reminder; optional **local** expiry/kit notifications (opt-in)
+- Backup reminder + JSON export / share / import (validated; pre-import backup download)
+- Emergency contacts and household **notes**; collapsible side panels
+- Mobile card layout for supplies; desktop table unchanged
+- Light / dark / system theme; Progressive Web App (offline after first visit)
+- In-app **Help**, **Advice**, and **Privacy** (free, no signup, no tracking, no ads)
 
 ## Quick start
 
@@ -49,20 +48,24 @@ State is saved under the localStorage key `emergency-supplies-state` as versione
 
 ```ts
 {
-  version: 3,
-  settings: { people, days, theme, lastCheckedAt },
+  version: 4,
+  settings: {
+    people, days, theme, lastCheckedAt, lastExportedAt,
+    profile: { infants, schoolAge, pets, medical },
+    notifications: { enabled, kitCheck, expired, expiring, expiringLeadDays, lastNotifiedKey }
+  },
   categories: [{ id, name }],
   items: [{
     id, name, categoryId, unit, qtyRequiredBase,
     scaleWithPeople, scaleWithDays, qtyInStock,
-    expiryDate, notes, grabBag, priority // 'high' | 'medium' | 'low'
+    expiryDate, notes, grabBag, priority, storageLocation
   }],
   contacts: [{ id, label, value }],
   notes: [{ id, title, body, updatedAt }]
 }
 ```
 
-Imports still accept legacy `householdNotes` strings (migrated into a note) and missing `priority` (defaults to `medium`).
+Imports still accept legacy `householdNotes` strings (migrated into a note), missing `priority` (defaults to `medium`), and missing v4 fields (sensible defaults).
 
 **Effective required quantity** =
 
@@ -85,17 +88,19 @@ The seed list includes drinking water (3 L/person/day), long-life food, hygiene,
 
 Merge mode skips items whose **names** already exist. Replace mode rebuilds the item list from the seed.
 
-## Help and Advice
+## Help, Advice, and Privacy
 
 - `/emergency/help` — how to use the app
-- `/emergency/advice` — situational guidance index and topic pages
+- `/emergency/advice` — situational guidance (links into supplies filters / scenario seed)
+- `/emergency/shopping` — shopping list mode
+- `/emergency/grab-bag` — grab-bag packing checklist
+- `/emergency/privacy` — free / no signup / no tracking / no ads philosophy
 
 Content ships with the app so it remains available offline via the service worker.
 
 ## Privacy
 
-No analytics backend is bundled by this project. Data does not leave your device unless **you** export a file or your browser syncs localStorage (depending on your browser/account settings).
-
+See the in-app [Privacy](./src/pages/PrivacyPage.tsx) page once deployed (`/emergency/privacy`). No analytics backend is bundled. Data stays in localStorage unless **you** export/share a file, or your browser syncs site data.
 ## Stack
 
 - Vite + React + TypeScript
