@@ -92,6 +92,22 @@ textarea {
   color: inherit;
 }
 
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+select,
+textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  caret-color: var(--text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
 button {
   cursor: pointer;
 }
@@ -125,15 +141,39 @@ button {
 
 .brand {
   display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
+  align-items: center;
+  gap: 0.65rem;
   text-decoration: none;
   color: inherit;
 }
 
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.55rem;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+[data-theme='dark'] .brand-mark {
+  color: #0e1612;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
 .brand-title {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   font-weight: 600;
   color: var(--accent);
 }
@@ -141,6 +181,14 @@ button {
 .brand-sub {
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+.page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .nav-links {
@@ -318,6 +366,31 @@ button {
   color: var(--danger);
 }
 
+.btn-danger-quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+
+.btn-danger-quiet:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  color: var(--danger);
+  opacity: 1;
+}
+
+.btn-edit {
+  background: var(--ok-soft);
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--border));
+  color: var(--ok);
+}
+
+.btn-edit:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ok-soft) 70%, var(--ok));
+  border-color: var(--ok);
+}
+
 .btn-ghost {
   background: transparent;
 }
@@ -325,6 +398,88 @@ button {
 .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.85rem;
+}
+
+.btn-xs {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.75rem;
+}
+
+.btn-icon {
+  position: relative;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+}
+
+.btn-icon.btn-sm {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.btn-icon.btn-xs {
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.btn-icon-glyph {
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+.btn-icon[data-tooltip]:hover::after,
+.btn-icon[data-tooltip]:focus-visible::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.45rem;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 30;
+  box-shadow: var(--shadow);
+}
+
+.collapsible-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+}
+
+.collapsible-toggle-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.collapsible-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.collapsible-body {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.collapsible-panel {
+  padding: 0.75rem 1rem;
 }
 
 .table-wrap {
@@ -403,6 +558,33 @@ table.data tr:hover {
 .badge.danger {
   background: var(--danger-soft);
   color: var(--danger);
+}
+
+.badge.priority-high {
+  background: var(--danger-soft);
+  color: var(--danger);
+  text-transform: capitalize;
+}
+
+.badge.priority-medium {
+  background: var(--warn-soft);
+  color: var(--warn);
+  text-transform: capitalize;
+}
+
+.badge.priority-low {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.confirm-modal {
+  max-width: 420px;
+}
+
+.confirm-modal p {
+  margin: 0.5rem 0 0;
+  color: var(--text);
 }
 
 .layout-split {
@@ -570,9 +752,19 @@ table.data tr:hover {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  background: var(--bg);
+  background: var(--bg-muted);
   border-radius: var(--radius);
   border: 1px solid var(--border);
+}
+
+.side-list input,
+.side-list textarea {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.35rem 0.5rem;
 }
 
 .muted {

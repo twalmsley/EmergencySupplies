@@ -1,6 +1,8 @@
-# Emergency Supplies
+# Be Prepared
 
 A **browser-only** app for planning and tracking household emergency supplies for **N people** over **M days**. Everything stays in your browser’s local storage — there is no server and no account.
+
+**Brand name:** Be Prepared (independent of the UK Government Be Ready campaign; see attribution below).
 
 Aligned with public UK preparedness guidance from [Be Ready](https://beready.campaign.gov.uk/be-ready-for-emergencies/) and the [British Red Cross emergency kit](https://www.redcross.org.uk/get-help/prepare-for-emergencies/prepare-an-emergency-kit) checklist, plus practical advice pages for outages, seasons, cooking, and water.
 
@@ -9,13 +11,16 @@ Aligned with public UK preparedness guidance from [Be Ready](https://beready.cam
 ## Features
 
 - Editable household size (**N**) and readiness horizon (**M days**)
-- Categorised item list: name, category, unit, quantity required (with optional N/M scaling), quantity in stock, expiry date, notes, grab-bag flag
+- Categorised item list: name, category, **priority** (high/medium/low), unit, quantity required (with optional N/M scaling), quantity in stock, expiry date, notes, grab-bag flag
+- Custom in-app confirmation dialogs for destructive actions (no browser `confirm`)
 - Default categories: Food, Drinks, Medical, Hygiene, Power, Heat+Light, Communications, Money, Baby, Pet, Documents (fully editable)
 - **Preseed essentials** from Be Ready / Red Cross–inspired catalogue (merge missing items, or replace all)
 - Sortable columns; search; filters for shopping list, expired, expiring soon, grab bag
 - Readiness summary (% of items fully stocked for N×M)
 - Six-month kit-check reminder
-- Emergency contacts and household notes
+- Emergency contacts and multiple household **notes** (add / edit / delete)
+- Collapsible Categories, Contacts, and Notes side panels (collapsed by default)
+- Icon action buttons with tooltips
 - JSON export / import (validated; backup downloaded before import)
 - PDF export of the **currently sorted/filtered** list; print stylesheet fallback
 - Light / dark / system theme
@@ -42,18 +47,20 @@ State is saved under the localStorage key `emergency-supplies-state` as versione
 
 ```ts
 {
-  version: 1,
+  version: 3,
   settings: { people, days, theme, lastCheckedAt },
   categories: [{ id, name }],
   items: [{
     id, name, categoryId, unit, qtyRequiredBase,
     scaleWithPeople, scaleWithDays, qtyInStock,
-    expiryDate, notes, grabBag
+    expiryDate, notes, grabBag, priority // 'high' | 'medium' | 'low'
   }],
   contacts: [{ id, label, value }],
-  householdNotes: string
+  notes: [{ id, title, body, updatedAt }]
 }
 ```
+
+Imports still accept legacy `householdNotes` strings (migrated into a note) and missing `priority` (defaults to `medium`).
 
 **Effective required quantity** =
 
@@ -67,7 +74,7 @@ Clearing site data for this origin deletes your kit list. Use **Export JSON** fo
 | --- | --- |
 | Export JSON | Downloads full app state |
 | Import JSON | Validates schema, downloads a backup of current data, then replaces local state |
-| Export PDF | PDF of visible rows in current sort order |
+| Export PDF | PDF of visible supply rows (current sort/filters), plus contacts and notes |
 | Print | Browser print dialog; chrome UI hidden via print CSS |
 
 ## Preseed catalogue

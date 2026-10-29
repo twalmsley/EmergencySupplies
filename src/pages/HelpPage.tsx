@@ -1,9 +1,9 @@
 export function HelpPage() {
   return (
     <article className="prose panel">
-      <h1>Help — how to use this app</h1>
+      <h1>Help — how to use Be Prepared</h1>
       <p className="disclaimer">
-        This app stores data only in your browser. It does not replace official
+        Be Prepared stores data only in your browser. It does not replace official
         emergency guidance. If you or someone else is in immediate danger, call{' '}
         <strong>999</strong>.
       </p>
@@ -56,10 +56,12 @@ export function HelpPage() {
 
       <h2 id="items">Items</h2>
       <p>
-        Each item has a name, category, unit, base quantity required, quantity
-        in stock, optional expiry date, notes, grab-bag flag, and scaling
-        options. Add, edit, or delete from the Supplies table. Stock below the
-        effective required amount shows as understocked (shopping list).
+        Each item has a name, category, priority (high / medium / low), unit,
+        base quantity required, quantity in stock, optional expiry date, notes,
+        grab-bag flag, and scaling options. Add, edit, or delete from the
+        Supplies table — deletes ask for confirmation in an in-app dialog.
+        Priority is a sortable column. Stock below the effective required amount
+        shows as understocked (shopping list).
       </p>
 
       <h2 id="categories">Categories</h2>
@@ -121,8 +123,12 @@ export function HelpPage() {
 
       <h2 id="contacts">Contacts and notes</h2>
       <p>
-        Store phone numbers, radio frequencies, and a short household plan in
-        the side panel. Keep a paper copy somewhere easy to find in a power cut.
+        The side panels for <strong>Categories</strong>, <strong>Contacts</strong>,
+        and <strong>Notes</strong> start collapsed — expand them when you need
+        them. Contacts hold phone numbers and similar details. Notes are a list
+        you can add, edit, and delete (meeting points, radio frequencies,
+        medication summaries, and so on). Keep a paper copy somewhere easy to
+        find in a power cut.
       </p>
 
       <h2 id="theme">Theme</h2>

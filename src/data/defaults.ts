@@ -44,6 +44,6 @@ export function createEmptyState(): AppState {
       { id: 'power-cut', label: 'Power cut (GB)', value: '105' },
       { id: 'emergency', label: 'Emergency services', value: '999' },
     ],
-    householdNotes: '',
+    notes: [],
   };
 }

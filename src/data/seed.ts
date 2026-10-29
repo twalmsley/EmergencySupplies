@@ -1,8 +1,9 @@
-import type { Category, SupplyItem } from '../types';
+import type { Category, ItemPriority, SupplyItem } from '../types';
 import { slugId } from './defaults';
 
-export type SeedItem = Omit<SupplyItem, 'id' | 'categoryId'> & {
+export type SeedItem = Omit<SupplyItem, 'id' | 'categoryId' | 'priority'> & {
   categoryName: string;
+  priority?: ItemPriority;
 };
 
 /** Essentials drawn from UK Be Ready + British Red Cross guidance. */
@@ -19,6 +20,7 @@ export const SEED_ITEMS: SeedItem[] = [
     expiryDate: null,
     notes: '3 litres per person per day for drinking (Be Ready). More for cooking/washing.',
     grabBag: true,
+    priority: 'high',
   },
   {
     categoryName: 'Drinks',
@@ -31,6 +33,7 @@ export const SEED_ITEMS: SeedItem[] = [
     expiryDate: null,
     notes: 'Follow product instructions. See Advice → Water purification.',
     grabBag: true,
+    priority: 'medium',
   },
   {
     categoryName: 'Drinks',
@@ -550,9 +553,37 @@ export function seedToItems(seed: SeedItem[], categories: Category[]): SupplyIte
     if (!categoryId) {
       throw new Error(`Missing category: ${s.categoryName}`);
     }
-    const { categoryName: _, ...rest } = s;
-    return { ...rest, id: newId(), categoryId };
+    const { categoryName: _, priority, ...rest } = s;
+    return {
+      ...rest,
+      id: newId(),
+      categoryId,
+      priority: priority ?? defaultSeedPriority(s),
+    };
   });
+}
+
+function defaultSeedPriority(item: SeedItem): ItemPriority {
+  const name = item.name.toLowerCase();
+  if (
+    name.includes('water') ||
+    name.includes('medication') ||
+    name.includes('first aid') ||
+    name.includes('formula') ||
+    name.includes('power bank') ||
+    name.includes('torch')
+  ) {
+    return 'high';
+  }
+  if (
+    name.includes('cooker') ||
+    name.includes('fuel') ||
+    name.includes('filter') ||
+    name.includes('comfort')
+  ) {
+    return 'low';
+  }
+  return 'medium';
 }
 
 export function mergeSeedItems(

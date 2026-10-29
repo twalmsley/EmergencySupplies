@@ -1,10 +1,25 @@
+import {
+  Download,
+  FileDown,
+  FileUp,
+  ListPlus,
+  Pencil,
+  Plus,
+  Printer,
+  RefreshCw,
+  Trash2,
+} from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { CategoryManager } from '../components/CategoryManager';
+import { useConfirm } from '../components/ConfirmDialog';
 import { ContactsPanel } from '../components/ContactsPanel';
+import { IconButton } from '../components/IconButton';
 import { ItemModal } from '../components/ItemModal';
+import { NotesPanel } from '../components/NotesPanel';
 import { useApp } from '../context/AppContext';
 import { buildPdfRows, exportItemsPdf } from '../pdf';
 import type { SortDir, SortKey, StockFilter, SupplyItem } from '../types';
+import { PRIORITY_ORDER } from '../types';
 import {
   effectiveRequired,
   formatDate,
@@ -25,6 +40,7 @@ export function SuppliesPage() {
     exportJson,
     importJson,
   } = useApp();
+  const confirm = useConfirm();
   const fileRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('all');
@@ -79,6 +95,10 @@ export function SuppliesPage() {
           );
           if (cmp === 0) cmp = a.name.localeCompare(b.name);
           break;
+        case 'priority':
+          cmp = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
+          if (cmp === 0) cmp = a.name.localeCompare(b.name);
+          break;
         case 'qtyRequired':
           cmp = reqA - reqB;
           break;
@@ -130,15 +150,7 @@ export function SuppliesPage() {
     <div className="layout-split">
       <div>
         <div className="panel">
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              gap: '0.75rem',
-              marginBottom: '0.75rem',
-            }}
-          >
+          <div className="page-heading">
             <div>
               <h1>Supplies</h1>
               <p className="muted" style={{ margin: 0 }}>
@@ -150,19 +162,18 @@ export function SuppliesPage() {
               </p>
             </div>
             <div className="toolbar" style={{ margin: 0 }}>
-              <button
-                type="button"
-                className="btn btn-primary"
+              <IconButton
+                label="Add item"
+                icon={<Plus size={18} />}
+                variant="primary"
                 onClick={() => {
                   setEditing(null);
                   setModalOpen(true);
                 }}
-              >
-                Add item
-              </button>
-              <button
-                type="button"
-                className="btn"
+              />
+              <IconButton
+                label="Preseed essentials (merge missing)"
+                icon={<ListPlus size={18} />}
                 onClick={() => {
                   const n = preseedMerge();
                   alert(
@@ -171,24 +182,21 @@ export function SuppliesPage() {
                       : 'Your list already includes all seeded essentials.',
                   );
                 }}
-              >
-                Preseed (merge)
-              </button>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => {
-                  if (
-                    confirm(
+              />
+              <IconButton
+                label="Preseed essentials (replace all)"
+                icon={<RefreshCw size={18} />}
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: 'Replace all items?',
+                    message:
                       'Replace your entire item list with the seeded essentials? Current stock levels and notes on items will be lost.',
-                    )
-                  ) {
-                    preseedReplace();
-                  }
+                    confirmLabel: 'Replace all',
+                    danger: true,
+                  });
+                  if (ok) preseedReplace();
                 }}
-              >
-                Preseed (replace)
-              </button>
+              />
             </div>
           </div>
 
@@ -224,16 +232,12 @@ export function SuppliesPage() {
               <option value="expiring">Expiring soon</option>
               <option value="grabBag">Grab bag</option>
             </select>
-            <button type="button" className="btn" onClick={exportJson}>
-              Export JSON
-            </button>
-            <button
-              type="button"
-              className="btn"
+            <IconButton label="Export JSON" icon={<FileDown size={18} />} onClick={exportJson} />
+            <IconButton
+              label="Import JSON"
+              icon={<FileUp size={18} />}
               onClick={() => fileRef.current?.click()}
-            >
-              Import JSON
-            </button>
+            />
             <input
               ref={fileRef}
               type="file"
@@ -249,16 +253,16 @@ export function SuppliesPage() {
                 else alert('Import complete. A backup of your previous data was downloaded.');
               }}
             />
-            <button
-              type="button"
-              className="btn"
+            <IconButton
+              label="Export PDF"
+              icon={<Download size={18} />}
               onClick={() => exportItemsPdf(state, buildPdfRows(state, visible))}
-            >
-              Export PDF
-            </button>
-            <button type="button" className="btn" onClick={() => window.print()}>
-              Print
-            </button>
+            />
+            <IconButton
+              label="Print list"
+              icon={<Printer size={18} />}
+              onClick={() => window.print()}
+            />
           </div>
 
           {visible.length === 0 ? (
@@ -266,15 +270,14 @@ export function SuppliesPage() {
               {state.items.length === 0 ? (
                 <>
                   <p>No items yet. Preseed a comprehensive essentials list, or add your own.</p>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
+                  <IconButton
+                    label="Preseed essentials (merge missing)"
+                    icon={<ListPlus size={18} />}
+                    variant="primary"
                     onClick={() => {
                       preseedMerge();
                     }}
-                  >
-                    Preseed (merge)
-                  </button>
+                  />
                 </>
               ) : (
                 <p>No items match the current filters.</p>
@@ -289,6 +292,7 @@ export function SuppliesPage() {
                       [
                         ['name', 'Name'],
                         ['category', 'Category'],
+                        ['priority', 'Priority'],
                         ['unit', 'Unit'],
                         ['qtyRequired', 'Required'],
                         ['qtyInStock', 'In stock'],
@@ -327,6 +331,11 @@ export function SuppliesPage() {
                           )}
                         </td>
                         <td>{catName.get(item.categoryId) ?? '—'}</td>
+                        <td>
+                          <span className={`badge priority-${item.priority}`}>
+                            {item.priority}
+                          </span>
+                        </td>
                         <td>{item.unit}</td>
                         <td>
                           {req}
@@ -356,25 +365,31 @@ export function SuppliesPage() {
                         <td>{item.notes}</td>
                         <td className="no-print">
                           <div className="row-actions">
-                            <button
-                              type="button"
-                              className="btn btn-sm"
+                            <IconButton
+                              label={`Edit ${item.name}`}
+                              icon={<Pencil size={14} />}
+                              variant="edit"
+                              size="sm"
                               onClick={() => {
                                 setEditing(item);
                                 setModalOpen(true);
                               }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-danger"
-                              onClick={() => {
-                                if (confirm(`Delete “${item.name}”?`)) deleteItem(item.id);
+                            />
+                            <IconButton
+                              label={`Delete ${item.name}`}
+                              icon={<Trash2 size={12} />}
+                              variant="danger-quiet"
+                              size="xs"
+                              onClick={async () => {
+                                const ok = await confirm({
+                                  title: 'Delete item?',
+                                  message: `Delete “${item.name}”? This cannot be undone.`,
+                                  confirmLabel: 'Delete item',
+                                  danger: true,
+                                });
+                                if (ok) deleteItem(item.id);
                               }}
-                            >
-                              Delete
-                            </button>
+                            />
                           </div>
                         </td>
                       </tr>
@@ -390,6 +405,7 @@ export function SuppliesPage() {
       <aside>
         <CategoryManager />
         <ContactsPanel />
+        <NotesPanel />
       </aside>
 
       <ItemModal

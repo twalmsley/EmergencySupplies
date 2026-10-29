@@ -1,6 +1,18 @@
 import { createEmptyState } from './data/defaults';
-import type { AppState, Category, Contact, SupplyItem, ThemeMode } from './types';
+import type {
+  AppState,
+  Category,
+  Contact,
+  ItemPriority,
+  Note,
+  SupplyItem,
+  ThemeMode,
+} from './types';
 import { APP_STATE_VERSION, STORAGE_KEY } from './types';
+
+function parsePriority(v: unknown): ItemPriority {
+  return v === 'high' || v === 'low' || v === 'medium' ? v : 'medium';
+}
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -44,6 +56,7 @@ function parseItem(v: unknown): SupplyItem | null {
     expiryDate: typeof v.expiryDate === 'string' && v.expiryDate ? v.expiryDate : null,
     notes: asString(v.notes),
     grabBag: asBoolean(v.grabBag),
+    priority: parsePriority(v.priority),
   };
 }
 
@@ -53,6 +66,35 @@ function parseContact(v: unknown): Contact | null {
   const label = asString(v.label);
   if (!id || !label) return null;
   return { id, label, value: asString(v.value) };
+}
+
+function parseNote(v: unknown): Note | null {
+  if (!isObject(v)) return null;
+  const id = asString(v.id);
+  const title = asString(v.title);
+  if (!id) return null;
+  return {
+    id,
+    title: title || 'Note',
+    body: asString(v.body),
+    updatedAt: asString(v.updatedAt, new Date().toISOString()),
+  };
+}
+
+function migrateNotes(raw: Record<string, unknown>): Note[] {
+  if (Array.isArray(raw.notes)) {
+    return raw.notes.map(parseNote).filter((n): n is Note => n !== null);
+  }
+  const legacy = asString(raw.householdNotes).trim();
+  if (!legacy) return [];
+  return [
+    {
+      id: 'migrated-household-notes',
+      title: 'Household notes',
+      body: legacy,
+      updatedAt: new Date().toISOString(),
+    },
+  ];
 }
 
 export function parseAppState(raw: unknown): AppState {
@@ -79,7 +121,7 @@ export function parseAppState(raw: unknown): AppState {
     : base.contacts;
 
   return {
-    version: asNumber(raw.version, APP_STATE_VERSION),
+    version: APP_STATE_VERSION,
     settings: {
       people: Math.max(1, Math.floor(asNumber(settingsRaw.people, base.settings.people))),
       days: Math.max(1, Math.floor(asNumber(settingsRaw.days, base.settings.days))),
@@ -90,7 +132,7 @@ export function parseAppState(raw: unknown): AppState {
     categories: categories.length > 0 ? categories : base.categories,
     items,
     contacts,
-    householdNotes: asString(raw.householdNotes),
+    notes: migrateNotes(raw),
   };
 }
 

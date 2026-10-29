@@ -5,6 +5,8 @@ export type Category = {
   name: string;
 };
 
+export type ItemPriority = 'high' | 'medium' | 'low';
+
 export type SupplyItem = {
   id: string;
   name: string;
@@ -17,12 +19,20 @@ export type SupplyItem = {
   expiryDate: string | null;
   notes: string;
   grabBag: boolean;
+  priority: ItemPriority;
 };
 
 export type Contact = {
   id: string;
   label: string;
   value: string;
+};
+
+export type Note = {
+  id: string;
+  title: string;
+  body: string;
+  updatedAt: string;
 };
 
 export type AppSettings = {
@@ -38,7 +48,7 @@ export type AppState = {
   categories: Category[];
   items: SupplyItem[];
   contacts: Contact[];
-  householdNotes: string;
+  notes: Note[];
 };
 
 export type StockFilter =
@@ -52,6 +62,7 @@ export type StockFilter =
 export type SortKey =
   | 'name'
   | 'category'
+  | 'priority'
   | 'qtyRequired'
   | 'qtyInStock'
   | 'expiryDate'
@@ -61,7 +72,13 @@ export type SortKey =
 
 export type SortDir = 'asc' | 'desc';
 
-export const APP_STATE_VERSION = 1;
+export const PRIORITY_ORDER: Record<ItemPriority, number> = {
+  high: 0,
+  medium: 1,
+  low: 2,
+};
+
+export const APP_STATE_VERSION = 3;
 export const STORAGE_KEY = 'emergency-supplies-state';
 export const EXPIRING_SOON_DAYS = 90;
 export const CHECK_REMINDER_DAYS = 180;
