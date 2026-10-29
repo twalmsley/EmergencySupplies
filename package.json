@@ -1,0 +1,30 @@
+{
+  "name": "emergency-supplies",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Browser-only emergency supplies manager for N people and M days",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.9.4",
+    "vite-plugin-pwa": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "oxlint": "^1.89.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.5"
+  }
+}
