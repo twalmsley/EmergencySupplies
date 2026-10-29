@@ -3,11 +3,16 @@ import type {
   AppState,
   Category,
   Contact,
+  ItemPriority,
   Note,
   SupplyItem,
   ThemeMode,
 } from './types';
 import { APP_STATE_VERSION, STORAGE_KEY } from './types';
+
+function parsePriority(v: unknown): ItemPriority {
+  return v === 'high' || v === 'low' || v === 'medium' ? v : 'medium';
+}
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -51,6 +56,7 @@ function parseItem(v: unknown): SupplyItem | null {
     expiryDate: typeof v.expiryDate === 'string' && v.expiryDate ? v.expiryDate : null,
     notes: asString(v.notes),
     grabBag: asBoolean(v.grabBag),
+    priority: parsePriority(v.priority),
   };
 }
 

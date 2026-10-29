@@ -56,10 +56,12 @@ export function HelpPage() {
 
       <h2 id="items">Items</h2>
       <p>
-        Each item has a name, category, unit, base quantity required, quantity
-        in stock, optional expiry date, notes, grab-bag flag, and scaling
-        options. Add, edit, or delete from the Supplies table. Stock below the
-        effective required amount shows as understocked (shopping list).
+        Each item has a name, category, priority (high / medium / low), unit,
+        base quantity required, quantity in stock, optional expiry date, notes,
+        grab-bag flag, and scaling options. Add, edit, or delete from the
+        Supplies table — deletes ask for confirmation in an in-app dialog.
+        Priority is a sortable column. Stock below the effective required amount
+        shows as understocked (shopping list).
       </p>
 
       <h2 id="categories">Categories</h2>

@@ -2,10 +2,12 @@ import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CollapsiblePanel } from './CollapsiblePanel';
+import { useConfirm } from './ConfirmDialog';
 import { IconButton } from './IconButton';
 
 export function NotesPanel() {
   const { state, addNote, updateNote, deleteNote } = useApp();
+  const confirm = useConfirm();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -100,6 +102,7 @@ export function NotesPanel() {
                   <IconButton
                     label={`Edit note ${n.title}`}
                     icon={<Pencil size={14} />}
+                    variant="edit"
                     size="sm"
                     onClick={() => {
                       setEditingId(n.id);
@@ -109,11 +112,17 @@ export function NotesPanel() {
                   />
                   <IconButton
                     label={`Delete note ${n.title}`}
-                    icon={<Trash2 size={14} />}
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      if (confirm(`Delete note “${n.title}”?`)) deleteNote(n.id);
+                    icon={<Trash2 size={12} />}
+                    variant="danger-quiet"
+                    size="xs"
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: 'Delete note?',
+                        message: `Delete note “${n.title}”?`,
+                        confirmLabel: 'Delete note',
+                        danger: true,
+                      });
+                      if (ok) deleteNote(n.id);
                     }}
                   />
                 </div>

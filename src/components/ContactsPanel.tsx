@@ -2,10 +2,12 @@ import { CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CollapsiblePanel } from './CollapsiblePanel';
+import { useConfirm } from './ConfirmDialog';
 import { IconButton } from './IconButton';
 
 export function ContactsPanel() {
   const { state, addContact, updateContact, deleteContact, markChecked } = useApp();
+  const confirm = useConfirm();
   const [label, setLabel] = useState('');
   const [value, setValue] = useState('');
 
@@ -49,10 +51,18 @@ export function ContactsPanel() {
             />
             <IconButton
               label={`Delete contact ${c.label}`}
-              icon={<Trash2 size={14} />}
-              variant="danger"
-              size="sm"
-              onClick={() => deleteContact(c.id)}
+              icon={<Trash2 size={12} />}
+              variant="danger-quiet"
+              size="xs"
+              onClick={async () => {
+                const ok = await confirm({
+                  title: 'Delete contact?',
+                  message: `Delete contact “${c.label}”?`,
+                  confirmLabel: 'Delete contact',
+                  danger: true,
+                });
+                if (ok) deleteContact(c.id);
+              }}
             />
           </li>
         ))}

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { CategoryManager } from '../components/CategoryManager';
+import { useConfirm } from '../components/ConfirmDialog';
 import { ContactsPanel } from '../components/ContactsPanel';
 import { IconButton } from '../components/IconButton';
 import { ItemModal } from '../components/ItemModal';
@@ -18,6 +19,7 @@ import { NotesPanel } from '../components/NotesPanel';
 import { useApp } from '../context/AppContext';
 import { buildPdfRows, exportItemsPdf } from '../pdf';
 import type { SortDir, SortKey, StockFilter, SupplyItem } from '../types';
+import { PRIORITY_ORDER } from '../types';
 import {
   effectiveRequired,
   formatDate,
@@ -38,6 +40,7 @@ export function SuppliesPage() {
     exportJson,
     importJson,
   } = useApp();
+  const confirm = useConfirm();
   const fileRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('all');
@@ -90,6 +93,10 @@ export function SuppliesPage() {
           cmp = (catName.get(a.categoryId) ?? '').localeCompare(
             catName.get(b.categoryId) ?? '',
           );
+          if (cmp === 0) cmp = a.name.localeCompare(b.name);
+          break;
+        case 'priority':
+          cmp = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
           if (cmp === 0) cmp = a.name.localeCompare(b.name);
           break;
         case 'qtyRequired':
@@ -179,14 +186,15 @@ export function SuppliesPage() {
               <IconButton
                 label="Preseed essentials (replace all)"
                 icon={<RefreshCw size={18} />}
-                onClick={() => {
-                  if (
-                    confirm(
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: 'Replace all items?',
+                    message:
                       'Replace your entire item list with the seeded essentials? Current stock levels and notes on items will be lost.',
-                    )
-                  ) {
-                    preseedReplace();
-                  }
+                    confirmLabel: 'Replace all',
+                    danger: true,
+                  });
+                  if (ok) preseedReplace();
                 }}
               />
             </div>
@@ -284,6 +292,7 @@ export function SuppliesPage() {
                       [
                         ['name', 'Name'],
                         ['category', 'Category'],
+                        ['priority', 'Priority'],
                         ['unit', 'Unit'],
                         ['qtyRequired', 'Required'],
                         ['qtyInStock', 'In stock'],
@@ -322,6 +331,11 @@ export function SuppliesPage() {
                           )}
                         </td>
                         <td>{catName.get(item.categoryId) ?? '—'}</td>
+                        <td>
+                          <span className={`badge priority-${item.priority}`}>
+                            {item.priority}
+                          </span>
+                        </td>
                         <td>{item.unit}</td>
                         <td>
                           {req}
@@ -354,6 +368,7 @@ export function SuppliesPage() {
                             <IconButton
                               label={`Edit ${item.name}`}
                               icon={<Pencil size={14} />}
+                              variant="edit"
                               size="sm"
                               onClick={() => {
                                 setEditing(item);
@@ -362,11 +377,17 @@ export function SuppliesPage() {
                             />
                             <IconButton
                               label={`Delete ${item.name}`}
-                              icon={<Trash2 size={14} />}
-                              variant="danger"
-                              size="sm"
-                              onClick={() => {
-                                if (confirm(`Delete “${item.name}”?`)) deleteItem(item.id);
+                              icon={<Trash2 size={12} />}
+                              variant="danger-quiet"
+                              size="xs"
+                              onClick={async () => {
+                                const ok = await confirm({
+                                  title: 'Delete item?',
+                                  message: `Delete “${item.name}”? This cannot be undone.`,
+                                  confirmLabel: 'Delete item',
+                                  danger: true,
+                                });
+                                if (ok) deleteItem(item.id);
                               }}
                             />
                           </div>

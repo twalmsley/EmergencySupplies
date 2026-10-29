@@ -350,6 +350,31 @@ button {
   color: var(--danger);
 }
 
+.btn-danger-quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+
+.btn-danger-quiet:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  color: var(--danger);
+  opacity: 1;
+}
+
+.btn-edit {
+  background: var(--ok-soft);
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--border));
+  color: var(--ok);
+}
+
+.btn-edit:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ok-soft) 70%, var(--ok));
+  border-color: var(--ok);
+}
+
 .btn-ghost {
   background: transparent;
 }
@@ -357,6 +382,11 @@ button {
 .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.85rem;
+}
+
+.btn-xs {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.75rem;
 }
 
 .btn-icon {
@@ -369,6 +399,11 @@ button {
 .btn-icon.btn-sm {
   width: 1.9rem;
   height: 1.9rem;
+}
+
+.btn-icon.btn-xs {
+  width: 1.55rem;
+  height: 1.55rem;
 }
 
 .btn-icon-glyph {
@@ -507,6 +542,33 @@ table.data tr:hover {
 .badge.danger {
   background: var(--danger-soft);
   color: var(--danger);
+}
+
+.badge.priority-high {
+  background: var(--danger-soft);
+  color: var(--danger);
+  text-transform: capitalize;
+}
+
+.badge.priority-medium {
+  background: var(--warn-soft);
+  color: var(--warn);
+  text-transform: capitalize;
+}
+
+.badge.priority-low {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.confirm-modal {
+  max-width: 420px;
+}
+
+.confirm-modal p {
+  margin: 0.5rem 0 0;
+  color: var(--text);
 }
 
 .layout-split {

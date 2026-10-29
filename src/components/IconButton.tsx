@@ -3,8 +3,8 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   label: string;
   icon: ReactNode;
-  variant?: 'default' | 'primary' | 'danger' | 'ghost';
-  size?: 'sm' | 'md';
+  variant?: 'default' | 'primary' | 'danger' | 'danger-quiet' | 'edit' | 'ghost';
+  size?: 'xs' | 'sm' | 'md';
 };
 
 export function IconButton({
@@ -21,10 +21,14 @@ export function IconButton({
       ? 'btn-primary'
       : variant === 'danger'
         ? 'btn-danger'
-        : variant === 'ghost'
-          ? 'btn-ghost'
-          : '';
-  const sizeClass = size === 'sm' ? 'btn-sm' : '';
+        : variant === 'danger-quiet'
+          ? 'btn-danger-quiet'
+          : variant === 'edit'
+            ? 'btn-edit'
+            : variant === 'ghost'
+              ? 'btn-ghost'
+              : '';
+  const sizeClass = size === 'xs' ? 'btn-xs' : size === 'sm' ? 'btn-sm' : '';
 
   return (
     <button

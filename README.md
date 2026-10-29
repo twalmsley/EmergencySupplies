@@ -11,7 +11,8 @@ Aligned with public UK preparedness guidance from [Be Ready](https://beready.cam
 ## Features
 
 - Editable household size (**N**) and readiness horizon (**M days**)
-- Categorised item list: name, category, unit, quantity required (with optional N/M scaling), quantity in stock, expiry date, notes, grab-bag flag
+- Categorised item list: name, category, **priority** (high/medium/low), unit, quantity required (with optional N/M scaling), quantity in stock, expiry date, notes, grab-bag flag
+- Custom in-app confirmation dialogs for destructive actions (no browser `confirm`)
 - Default categories: Food, Drinks, Medical, Hygiene, Power, Heat+Light, Communications, Money, Baby, Pet, Documents (fully editable)
 - **Preseed essentials** from Be Ready / Red Cross–inspired catalogue (merge missing items, or replace all)
 - Sortable columns; search; filters for shopping list, expired, expiring soon, grab bag
@@ -46,20 +47,20 @@ State is saved under the localStorage key `emergency-supplies-state` as versione
 
 ```ts
 {
-  version: 2,
+  version: 3,
   settings: { people, days, theme, lastCheckedAt },
   categories: [{ id, name }],
   items: [{
     id, name, categoryId, unit, qtyRequiredBase,
     scaleWithPeople, scaleWithDays, qtyInStock,
-    expiryDate, notes, grabBag
+    expiryDate, notes, grabBag, priority // 'high' | 'medium' | 'low'
   }],
   contacts: [{ id, label, value }],
   notes: [{ id, title, body, updatedAt }]
 }
 ```
 
-Imports still accept legacy `householdNotes` strings and migrate them into a single note.
+Imports still accept legacy `householdNotes` strings (migrated into a note) and missing `priority` (defaults to `medium`).
 
 **Effective required quantity** =
 

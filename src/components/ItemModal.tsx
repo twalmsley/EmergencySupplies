@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Category, SupplyItem } from '../types';
+import type { Category, ItemPriority, SupplyItem } from '../types';
 
 type Draft = Omit<SupplyItem, 'id'>;
 
@@ -14,6 +14,7 @@ const emptyDraft = (categoryId: string): Draft => ({
   expiryDate: null,
   notes: '',
   grabBag: false,
+  priority: 'medium',
 });
 
 type Props = {
@@ -127,6 +128,19 @@ export function ItemModal({ open, categories, initial, onClose, onSave }: Props)
                 setDraft({ ...draft, expiryDate: e.target.value || null })
               }
             />
+          </label>
+          <label>
+            Priority
+            <select
+              value={draft.priority}
+              onChange={(e) =>
+                setDraft({ ...draft, priority: e.target.value as ItemPriority })
+              }
+            >
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
           </label>
           <label className="check">
             <input

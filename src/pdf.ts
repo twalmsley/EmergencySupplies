@@ -24,10 +24,23 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
 
   autoTable(doc, {
     startY: 26,
-    head: [['Name', 'Category', 'Unit', 'Required', 'In stock', 'Expiry', 'Grab bag', 'Notes']],
+    head: [
+      [
+        'Name',
+        'Category',
+        'Priority',
+        'Unit',
+        'Required',
+        'In stock',
+        'Expiry',
+        'Grab bag',
+        'Notes',
+      ],
+    ],
     body: rows.map(({ item, categoryName, qtyRequired }) => [
       item.name,
       categoryName,
+      item.priority,
       item.unit,
       String(qtyRequired),
       String(item.qtyInStock),
@@ -38,14 +51,15 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
     styles: { fontSize: 8, cellPadding: 1.5, overflow: 'linebreak' },
     headStyles: { fillColor: [30, 90, 60] },
     columnStyles: {
-      0: { cellWidth: 40 },
-      1: { cellWidth: 28 },
+      0: { cellWidth: 36 },
+      1: { cellWidth: 24 },
       2: { cellWidth: 16 },
-      3: { cellWidth: 18 },
-      4: { cellWidth: 18 },
-      5: { cellWidth: 22 },
-      6: { cellWidth: 16 },
-      7: { cellWidth: 'auto' },
+      3: { cellWidth: 14 },
+      4: { cellWidth: 16 },
+      5: { cellWidth: 16 },
+      6: { cellWidth: 20 },
+      7: { cellWidth: 14 },
+      8: { cellWidth: 'auto' },
     },
   });
 

@@ -2,10 +2,12 @@ import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CollapsiblePanel } from './CollapsiblePanel';
+import { useConfirm } from './ConfirmDialog';
 import { IconButton } from './IconButton';
 
 export function CategoryManager() {
   const { state, addCategory, renameCategory, deleteCategory } = useApp();
+  const confirm = useConfirm();
   const [name, setName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -62,6 +64,7 @@ export function CategoryManager() {
                   <IconButton
                     label={`Rename ${c.name}`}
                     icon={<Pencil size={14} />}
+                    variant="edit"
                     size="sm"
                     onClick={() => {
                       setEditingId(c.id);
@@ -70,21 +73,20 @@ export function CategoryManager() {
                   />
                   <IconButton
                     label={`Delete ${c.name}`}
-                    icon={<Trash2 size={14} />}
-                    variant="danger"
-                    size="sm"
+                    icon={<Trash2 size={12} />}
+                    variant="danger-quiet"
+                    size="xs"
                     disabled={state.categories.length < 2}
-                    onClick={() => {
+                    onClick={async () => {
                       const other = state.categories.find((x) => x.id !== c.id);
                       if (!other) return;
-                      if (
-                        !confirm(
-                          `Delete “${c.name}”? Items will move to “${other.name}”.`,
-                        )
-                      ) {
-                        return;
-                      }
-                      deleteCategory(c.id, other.id);
+                      const ok = await confirm({
+                        title: 'Delete category?',
+                        message: `Delete “${c.name}”? Items will move to “${other.name}”.`,
+                        confirmLabel: 'Delete category',
+                        danger: true,
+                      });
+                      if (ok) deleteCategory(c.id, other.id);
                     }}
                   />
                 </div>
