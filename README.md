@@ -34,11 +34,13 @@ npm install
 npm run dev
 ```
 
-Open the URL Vite prints (usually `http://localhost:5173`).
+Open the URL Vite prints (usually `http://localhost:5173/emergency/`).
+
+The production build is configured with Vite `base: '/emergency/'` so assets and client routes work when the app is hosted under that path.
 
 ```bash
 npm run build    # production build to dist/
-npm run preview  # serve the production build locally
+npm run preview  # serve the production build locally (under /emergency/)
 ```
 
 ## How data is stored
@@ -85,8 +87,8 @@ Merge mode skips items whose **names** already exist. Replace mode rebuilds the 
 
 ## Help and Advice
 
-- `/help` — how to use the app
-- `/advice` — situational guidance index and topic pages
+- `/emergency/help` — how to use the app
+- `/emergency/advice` — situational guidance index and topic pages
 
 Content ships with the app so it remains available offline via the service worker.
 

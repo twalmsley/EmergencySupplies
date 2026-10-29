@@ -3,6 +3,8 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // Deployed under https://…/emergency/
+  base: '/emergency/',
   plugins: [
     react(),
     VitePWA({
@@ -16,7 +18,8 @@ export default defineConfig({
         theme_color: '#1e5a3c',
         background_color: '#f3f0e8',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/emergency/',
+        scope: '/emergency/',
         icons: [
           {
             src: 'favicon.svg',
@@ -28,7 +31,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: '/emergency/index.html',
       },
     }),
   ],
