@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Emergency Supplies">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Be Ready">
   <rect width="64" height="64" rx="12" fill="#1e5a3c"/>
-  <path fill="#f3f0e8" d="M18 40V24h6l4 10 4-10h6v16h-5v-9l-4 9h-2l-4-9v9h-5zm28-16h5v16h-5z"/>
+  <text x="32" y="40" text-anchor="middle" fill="#f3f0e8" font-family="Arial, sans-serif" font-size="22" font-weight="700">BR</text>
 </svg>

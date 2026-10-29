@@ -1,6 +1,8 @@
-# Emergency Supplies
+# Be Ready
 
 A **browser-only** app for planning and tracking household emergency supplies for **N people** over **M days**. Everything stays in your browser’s local storage — there is no server and no account.
+
+**Brand name:** Be Ready (independent of the UK Government Be Ready campaign; see attribution below).
 
 Aligned with public UK preparedness guidance from [Be Ready](https://beready.campaign.gov.uk/be-ready-for-emergencies/) and the [British Red Cross emergency kit](https://www.redcross.org.uk/get-help/prepare-for-emergencies/prepare-an-emergency-kit) checklist, plus practical advice pages for outages, seasons, cooking, and water.
 
@@ -15,7 +17,9 @@ Aligned with public UK preparedness guidance from [Be Ready](https://beready.cam
 - Sortable columns; search; filters for shopping list, expired, expiring soon, grab bag
 - Readiness summary (% of items fully stocked for N×M)
 - Six-month kit-check reminder
-- Emergency contacts and household notes
+- Emergency contacts and multiple household **notes** (add / edit / delete)
+- Collapsible Categories, Contacts, and Notes side panels (collapsed by default)
+- Icon action buttons with tooltips
 - JSON export / import (validated; backup downloaded before import)
 - PDF export of the **currently sorted/filtered** list; print stylesheet fallback
 - Light / dark / system theme
@@ -42,7 +46,7 @@ State is saved under the localStorage key `emergency-supplies-state` as versione
 
 ```ts
 {
-  version: 1,
+  version: 2,
   settings: { people, days, theme, lastCheckedAt },
   categories: [{ id, name }],
   items: [{
@@ -51,9 +55,11 @@ State is saved under the localStorage key `emergency-supplies-state` as versione
     expiryDate, notes, grabBag
   }],
   contacts: [{ id, label, value }],
-  householdNotes: string
+  notes: [{ id, title, body, updatedAt }]
 }
 ```
+
+Imports still accept legacy `householdNotes` strings and migrate them into a single note.
 
 **Effective required quantity** =
 

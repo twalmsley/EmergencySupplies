@@ -1,21 +1,16 @@
+import { CheckCircle2, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { CollapsiblePanel } from './CollapsiblePanel';
+import { IconButton } from './IconButton';
 
 export function ContactsPanel() {
-  const {
-    state,
-    addContact,
-    updateContact,
-    deleteContact,
-    setHouseholdNotes,
-    markChecked,
-  } = useApp();
+  const { state, addContact, updateContact, deleteContact, markChecked } = useApp();
   const [label, setLabel] = useState('');
   const [value, setValue] = useState('');
 
   return (
-    <div className="panel side-panel no-print">
-      <h2>Contacts & notes</h2>
+    <CollapsiblePanel title="Contacts" badge={state.contacts.length}>
       <p className="muted">
         Keep paper copies too — phones may be unavailable in an outage.
       </p>
@@ -37,9 +32,7 @@ export function ContactsPanel() {
           Number / detail
           <input value={value} onChange={(e) => setValue(e.target.value)} />
         </label>
-        <button type="submit" className="btn btn-sm btn-primary">
-          Add contact
-        </button>
+        <IconButton type="submit" label="Add contact" icon={<Plus size={16} />} variant="primary" size="sm" />
       </form>
       <ul className="side-list" style={{ marginTop: '0.75rem' }}>
         {state.contacts.map((c) => (
@@ -54,40 +47,30 @@ export function ContactsPanel() {
               aria-label="Contact value"
               onChange={(e) => updateContact(c.id, { value: e.target.value })}
             />
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
+            <IconButton
+              label={`Delete contact ${c.label}`}
+              icon={<Trash2 size={14} />}
+              variant="danger"
+              size="sm"
               onClick={() => deleteContact(c.id)}
-            >
-              Delete
-            </button>
+            />
           </li>
         ))}
       </ul>
-      <label style={{ display: 'block', marginTop: '0.75rem' }}>
-        <span className="muted">Household notes</span>
-        <textarea
-          rows={5}
-          style={{ width: '100%', marginTop: '0.35rem' }}
-          value={state.householdNotes}
-          onChange={(e) => setHouseholdNotes(e.target.value)}
-          placeholder="Meeting point, radio frequencies, medication summary…"
+      <div className="toolbar" style={{ marginTop: '0.75rem' }}>
+        <IconButton
+          label="Mark kit checked today"
+          icon={<CheckCircle2 size={16} />}
+          size="sm"
+          onClick={markChecked}
         />
-      </label>
-      <button
-        type="button"
-        className="btn btn-sm"
-        style={{ marginTop: '0.5rem' }}
-        onClick={markChecked}
-      >
-        Mark kit checked today
-      </button>
+      </div>
       {state.settings.lastCheckedAt && (
         <p className="muted" style={{ marginTop: '0.35rem' }}>
           Last checked:{' '}
           {new Date(state.settings.lastCheckedAt).toLocaleString()}
         </p>
       )}
-    </div>
+    </CollapsiblePanel>
   );
 }

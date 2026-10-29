@@ -1,19 +1,46 @@
+import { CheckCircle2, Moon, Monitor, Sun } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { needsCheckReminder, readinessStats } from '../utils';
+import { IconButton } from './IconButton';
 
 export function Layout() {
   const { state, setPeople, setDays, setTheme, markChecked } = useApp();
   const stats = readinessStats(state);
   const remind = needsCheckReminder(state.settings.lastCheckedAt);
 
+  function cycleTheme() {
+    const order = ['system', 'light', 'dark'] as const;
+    const idx = order.indexOf(state.settings.theme);
+    setTheme(order[(idx + 1) % order.length]);
+  }
+
+  const themeLabel =
+    state.settings.theme === 'light'
+      ? 'Theme: light (click for dark)'
+      : state.settings.theme === 'dark'
+        ? 'Theme: dark (click for system)'
+        : 'Theme: system (click for light)';
+
+  const ThemeIcon =
+    state.settings.theme === 'light'
+      ? Sun
+      : state.settings.theme === 'dark'
+        ? Moon
+        : Monitor;
+
   return (
     <div className="app-shell">
       <header className="site-header no-print">
         <div className="site-header-inner">
           <NavLink to="/" className="brand" end>
-            <span className="brand-title">Emergency Supplies</span>
-            <span className="brand-sub">Local kit planner for your household</span>
+            <span className="brand-mark" aria-hidden="true">
+              BR
+            </span>
+            <span className="brand-text">
+              <span className="brand-title">Be Ready</span>
+              <span className="brand-sub">Household emergency supplies</span>
+            </span>
           </NavLink>
 
           <nav className="nav-links" aria-label="Primary">
@@ -45,20 +72,11 @@ export function Layout() {
                 onChange={(e) => setDays(Number(e.target.value))}
               />
             </div>
-            <div className="field-inline">
-              <label htmlFor="theme">Theme</label>
-              <select
-                id="theme"
-                value={state.settings.theme}
-                onChange={(e) =>
-                  setTheme(e.target.value as 'light' | 'dark' | 'system')
-                }
-              >
-                <option value="system">System</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </div>
+            <IconButton
+              label={themeLabel}
+              icon={<ThemeIcon size={18} />}
+              onClick={cycleTheme}
+            />
             <span
               className={`chip ${stats.percent < 70 && stats.total > 0 ? 'warn' : ''}`}
               title="Share of items with enough stock for N×M"
@@ -73,15 +91,18 @@ export function Layout() {
         {remind && (
           <div className="banner no-print" role="status">
             <div>
-              <strong>Kit check due.</strong> Be Ready suggests reviewing expiry
-              dates and household needs about every six months.
+              <strong>Kit check due.</strong> Review expiry dates and household
+              needs about every six months.
               {state.settings.lastCheckedAt
                 ? ` Last checked: ${new Date(state.settings.lastCheckedAt).toLocaleDateString()}.`
                 : ' Not checked yet.'}
             </div>
-            <button type="button" className="btn btn-primary" onClick={markChecked}>
-              Mark checked today
-            </button>
+            <IconButton
+              label="Mark kit checked today"
+              icon={<CheckCircle2 size={18} />}
+              variant="primary"
+              onClick={markChecked}
+            />
           </div>
         )}
         <Outlet />

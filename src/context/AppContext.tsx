@@ -20,6 +20,7 @@ import type {
   AppState,
   Category,
   Contact,
+  Note,
   SupplyItem,
   ThemeMode,
 } from '../types';
@@ -40,7 +41,9 @@ type AppContextValue = {
   addContact: (label: string, value: string) => void;
   updateContact: (id: string, patch: Partial<Contact>) => void;
   deleteContact: (id: string) => void;
-  setHouseholdNotes: (notes: string) => void;
+  addNote: (title: string, body: string) => void;
+  updateNote: (id: string, patch: Partial<Pick<Note, 'title' | 'body'>>) => void;
+  deleteNote: (id: string) => void;
   preseedMerge: () => number;
   preseedReplace: () => void;
   exportJson: () => void;
@@ -152,7 +155,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
         })),
       deleteContact: (id) =>
         update((s) => ({ ...s, contacts: s.contacts.filter((c) => c.id !== id) })),
-      setHouseholdNotes: (notes) => update((s) => ({ ...s, householdNotes: notes })),
+      addNote: (title, body) =>
+        update((s) => ({
+          ...s,
+          notes: [
+            ...s.notes,
+            {
+              id: newId(),
+              title: title.trim() || 'Note',
+              body,
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        })),
+      updateNote: (id, patch) =>
+        update((s) => ({
+          ...s,
+          notes: s.notes.map((n) =>
+            n.id === id
+              ? {
+                  ...n,
+                  ...patch,
+                  id,
+                  title: (patch.title ?? n.title).trim() || 'Note',
+                  updatedAt: new Date().toISOString(),
+                }
+              : n,
+          ),
+        })),
+      deleteNote: (id) =>
+        update((s) => ({ ...s, notes: s.notes.filter((n) => n.id !== id) })),
       preseedMerge: () => {
         const categories = ensureCategoriesForSeed(state.categories, SEED_ITEMS);
         const seeded = seedToItems(SEED_ITEMS, categories);

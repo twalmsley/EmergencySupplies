@@ -25,6 +25,13 @@ export type Contact = {
   value: string;
 };
 
+export type Note = {
+  id: string;
+  title: string;
+  body: string;
+  updatedAt: string;
+};
+
 export type AppSettings = {
   people: number;
   days: number;
@@ -38,7 +45,7 @@ export type AppState = {
   categories: Category[];
   items: SupplyItem[];
   contacts: Contact[];
-  householdNotes: string;
+  notes: Note[];
 };
 
 export type StockFilter =
@@ -61,7 +68,7 @@ export type SortKey =
 
 export type SortDir = 'asc' | 'desc';
 
-export const APP_STATE_VERSION = 1;
+export const APP_STATE_VERSION = 2;
 export const STORAGE_KEY = 'emergency-supplies-state';
 export const EXPIRING_SOON_DAYS = 90;
 export const CHECK_REMINDER_DAYS = 180;
