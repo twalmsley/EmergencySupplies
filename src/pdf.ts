@@ -9,8 +9,17 @@ export type PdfRow = {
   qtyRequired: number;
 };
 
+type JsPdfWithAutoTable = jsPDF & {
+  lastAutoTable?: { finalY: number };
+};
+
+function nextTableStartY(doc: JsPdfWithAutoTable, fallback = 26): number {
+  const y = doc.lastAutoTable?.finalY;
+  return typeof y === 'number' ? y + 10 : fallback;
+}
+
 export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' }) as JsPdfWithAutoTable;
   const { people, days } = state.settings;
 
   doc.setFontSize(16);
@@ -37,17 +46,20 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
         'Notes',
       ],
     ],
-    body: rows.map(({ item, categoryName, qtyRequired }) => [
-      item.name,
-      categoryName,
-      item.priority,
-      item.unit,
-      String(qtyRequired),
-      String(item.qtyInStock),
-      formatDate(item.expiryDate),
-      item.grabBag ? 'Yes' : '',
-      item.notes,
-    ]),
+    body:
+      rows.length > 0
+        ? rows.map(({ item, categoryName, qtyRequired }) => [
+            item.name,
+            categoryName,
+            item.priority,
+            item.unit,
+            String(qtyRequired),
+            String(item.qtyInStock),
+            formatDate(item.expiryDate),
+            item.grabBag ? 'Yes' : '',
+            item.notes,
+          ])
+        : [['No items in current view', '', '', '', '', '', '', '', '']],
     styles: { fontSize: 8, cellPadding: 1.5, overflow: 'linebreak' },
     headStyles: { fillColor: [30, 90, 60] },
     columnStyles: {
@@ -60,6 +72,47 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
       6: { cellWidth: 20 },
       7: { cellWidth: 14 },
       8: { cellWidth: 'auto' },
+    },
+  });
+
+  let y = nextTableStartY(doc);
+  doc.setFontSize(13);
+  doc.text('Contacts', 14, y);
+  autoTable(doc, {
+    startY: y + 3,
+    head: [['Label', 'Detail']],
+    body:
+      state.contacts.length > 0
+        ? state.contacts.map((c) => [c.label, c.value])
+        : [['No contacts saved', '']],
+    styles: { fontSize: 9, cellPadding: 1.5, overflow: 'linebreak' },
+    headStyles: { fillColor: [30, 90, 60] },
+    columnStyles: {
+      0: { cellWidth: 60 },
+      1: { cellWidth: 'auto' },
+    },
+  });
+
+  y = nextTableStartY(doc);
+  doc.setFontSize(13);
+  doc.text('Notes', 14, y);
+  autoTable(doc, {
+    startY: y + 3,
+    head: [['Title', 'Note', 'Updated']],
+    body:
+      state.notes.length > 0
+        ? state.notes.map((n) => [
+            n.title,
+            n.body,
+            new Date(n.updatedAt).toLocaleString(),
+          ])
+        : [['No notes saved', '', '']],
+    styles: { fontSize: 9, cellPadding: 1.5, overflow: 'linebreak' },
+    headStyles: { fillColor: [30, 90, 60] },
+    columnStyles: {
+      0: { cellWidth: 45 },
+      1: { cellWidth: 'auto' },
+      2: { cellWidth: 40 },
     },
   });
 

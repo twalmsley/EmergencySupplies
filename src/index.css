@@ -92,6 +92,22 @@ textarea {
   color: inherit;
 }
 
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+select,
+textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  caret-color: var(--text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
 button {
   cursor: pointer;
 }
@@ -736,9 +752,19 @@ table.data tr:hover {
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem;
-  background: var(--bg);
+  background: var(--bg-muted);
   border-radius: var(--radius);
   border: 1px solid var(--border);
+}
+
+.side-list input,
+.side-list textarea {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.35rem 0.5rem;
 }
 
 .muted {

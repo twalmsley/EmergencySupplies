@@ -74,7 +74,7 @@ Clearing site data for this origin deletes your kit list. Use **Export JSON** fo
 | --- | --- |
 | Export JSON | Downloads full app state |
 | Import JSON | Validates schema, downloads a backup of current data, then replaces local state |
-| Export PDF | PDF of visible rows in current sort order |
+| Export PDF | PDF of visible supply rows (current sort/filters), plus contacts and notes |
 | Print | Browser print dialog; chrome UI hidden via print CSS |
 
 ## Preseed catalogue
