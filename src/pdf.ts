@@ -23,7 +23,7 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
   const { people, days } = state.settings;
 
   doc.setFontSize(16);
-  doc.text('Be Ready — Supplies List', 14, 16);
+  doc.text('Be Prepared — Supplies List', 14, 16);
   doc.setFontSize(10);
   doc.text(
     `Household: ${people} people · ${days} days · Exported ${todayIso()} · ${rows.length} items`,

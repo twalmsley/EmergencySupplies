@@ -1,9 +1,9 @@
 export function HelpPage() {
   return (
     <article className="prose panel">
-      <h1>Help — how to use Be Ready</h1>
+      <h1>Help — how to use Be Prepared</h1>
       <p className="disclaimer">
-        Be Ready stores data only in your browser. It does not replace official
+        Be Prepared stores data only in your browser. It does not replace official
         emergency guidance. If you or someone else is in immediate danger, call{' '}
         <strong>999</strong>.
       </p>

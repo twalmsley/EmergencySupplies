@@ -1,8 +1,8 @@
-# Be Ready
+# Be Prepared
 
 A **browser-only** app for planning and tracking household emergency supplies for **N people** over **M days**. Everything stays in your browser’s local storage — there is no server and no account.
 
-**Brand name:** Be Ready (independent of the UK Government Be Ready campaign; see attribution below).
+**Brand name:** Be Prepared (independent of the UK Government Be Ready campaign; see attribution below).
 
 Aligned with public UK preparedness guidance from [Be Ready](https://beready.campaign.gov.uk/be-ready-for-emergencies/) and the [British Red Cross emergency kit](https://www.redcross.org.uk/get-help/prepare-for-emergencies/prepare-an-emergency-kit) checklist, plus practical advice pages for outages, seasons, cooking, and water.
 

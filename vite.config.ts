@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Be Ready',
-        short_name: 'Be Ready',
+        name: 'Be Prepared',
+        short_name: 'Be Prepared',
         description:
           'Plan and track household emergency supplies for N people and M days.',
         theme_color: '#1e5a3c',

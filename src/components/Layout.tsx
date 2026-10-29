@@ -35,10 +35,10 @@ export function Layout() {
         <div className="site-header-inner">
           <NavLink to="/" className="brand" end>
             <span className="brand-mark" aria-hidden="true">
-              BR
+              BP
             </span>
             <span className="brand-text">
-              <span className="brand-title">Be Ready</span>
+              <span className="brand-title">Be Prepared</span>
               <span className="brand-sub">Household emergency supplies</span>
             </span>
           </NavLink>
