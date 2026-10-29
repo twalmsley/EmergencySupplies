@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { GRAB_BAG_WEIGHT_BONUS, PRIORITY_WEIGHTS } from '../types';
+
 export function HelpPage() {
   return (
     <article className="prose panel">
@@ -5,14 +8,15 @@ export function HelpPage() {
       <p className="disclaimer">
         Be Prepared stores data only in your browser. It does not replace official
         emergency guidance. If you or someone else is in immediate danger, call{' '}
-        <strong>999</strong>.
+        <strong>999</strong>. See also the <Link to="/privacy">Privacy</Link>{' '}
+        page (free, no signup, no tracking, no ads).
       </p>
 
       <nav className="toc" aria-label="Help contents">
         <strong>On this page</strong>
         <ol>
           <li>
-            <a href="#household">Household size and days</a>
+            <a href="#household">Household size, days, and profile</a>
           </li>
           <li>
             <a href="#items">Items</a>
@@ -27,7 +31,10 @@ export function HelpPage() {
             <a href="#filters">Sorting and filters</a>
           </li>
           <li>
-            <a href="#readiness">Readiness and kit checks</a>
+            <a href="#modes">Shopping and grab bag</a>
+          </li>
+          <li>
+            <a href="#readiness">Readiness, kit checks, and reminders</a>
           </li>
           <li>
             <a href="#contacts">Contacts and notes</a>
@@ -36,7 +43,7 @@ export function HelpPage() {
             <a href="#theme">Theme</a>
           </li>
           <li>
-            <a href="#import-export">Import, export, PDF, print</a>
+            <a href="#import-export">Import, export, backup, PDF, print</a>
           </li>
           <li>
             <a href="#pwa">Install and offline use</a>
@@ -44,7 +51,7 @@ export function HelpPage() {
         </ol>
       </nav>
 
-      <h2 id="household">Household size and days</h2>
+      <h2 id="household">Household size, days, and profile</h2>
       <p>
         Use <strong>People (N)</strong> and <strong>Days (M)</strong> in the
         header. Items marked to scale with people and/or days recalculate their{' '}
@@ -53,15 +60,22 @@ export function HelpPage() {
         water at 3&nbsp;L per person per day for 2 people and 3 days requires
         18&nbsp;L.
       </p>
+      <p>
+        In the <strong>Household &amp; reminders</strong> side panel you can
+        optionally set a household profile (infants, school-age children, pets,
+        medical needs). When any profile option is on, preseed skips Baby/Pet
+        categories unless you opted in, and Advice can highlight suggested
+        topics.
+      </p>
 
       <h2 id="items">Items</h2>
       <p>
         Each item has a name, category, priority (high / medium / low), unit,
-        base quantity required, quantity in stock, optional expiry date, notes,
-        grab-bag flag, and scaling options. Add, edit, or delete from the
-        Supplies table — deletes ask for confirmation in an in-app dialog.
-        Priority is a sortable column. Stock below the effective required amount
-        shows as understocked (shopping list).
+        base quantity required, quantity in stock, optional expiry date, optional
+        storage location, notes, grab-bag flag, and scaling options. Use the
+        inline <strong>+/−</strong> controls to adjust stock without opening the
+        editor, or the check icon to mark an item fully stocked. Deletes ask for
+        confirmation in an in-app dialog.
       </p>
 
       <h2 id="categories">Categories</h2>
@@ -91,34 +105,50 @@ export function HelpPage() {
           British Red Cross
         </a>{' '}
         guidance, plus extras such as water treatment and optional portable
-        cooking gear.
+        cooking gear. Merge adds only missing names; replace rebuilds the list
+        after confirmation. Advice topics can also add missing essentials for
+        related categories.
       </p>
-      <ul>
-        <li>
-          <strong>Merge</strong> (recommended): adds only items whose names are
-          not already on your list.
-        </li>
-        <li>
-          <strong>Replace</strong>: rebuilds the item list from the seed catalog
-          (stock and notes on existing items are lost). Asks for confirmation
-          first.
-        </li>
-      </ul>
-      <p>Tailor quantities and remove anything that does not fit your household.</p>
 
       <h2 id="filters">Sorting and filters</h2>
       <p>
-        Click any column header to sort. Search matches name, notes, and
-        category. Filters include shopping list (understocked), expired,
-        expiring soon (within 90 days), and grab-bag only.
+        Click any column header to sort. Search matches name, notes, location,
+        and category. Filters include understocked, expired, expiring soon
+        (within 90 days), grab-bag only, and storage location. Deep links from
+        Advice can open Supplies with a category and understocked filter applied.
       </p>
 
-      <h2 id="readiness">Readiness and kit checks</h2>
+      <h2 id="modes">Shopping and grab bag</h2>
       <p>
-        The header chip shows the percentage of items that meet their required
-        stock for the current N×M. A banner reminds you to review the kit about
-        every six months — use <strong>Mark checked today</strong> when you have
-        rotated stock or updated needs.
+        <Link to="/shopping">Shopping</Link> lists items below required quantity
+        with quantity still needed, session check-off, and “Mark purchased”
+        (adds the shortfall to stock). It has its own PDF/print layout.
+      </p>
+      <p>
+        <Link to="/grab-bag">Grab bag</Link> is a packing checklist for flagged
+        items, with session ticks and a compact packing PDF.
+      </p>
+
+      <h2 id="readiness">Readiness, kit checks, and reminders</h2>
+      <p>
+        The header chip shows a <strong>weighted</strong> readiness percentage.
+        Each item contributes weight{' '}
+        <code>
+          {PRIORITY_WEIGHTS.high} (high) / {PRIORITY_WEIGHTS.medium} (medium) /{' '}
+          {PRIORITY_WEIGHTS.low} (low)
+        </code>
+        , plus <code>+{GRAB_BAG_WEIGHT_BONUS}</code> if it is a grab-bag item.
+        Only fully stocked items count toward the numerator, so high-priority
+        gaps hurt the score more. Critical (high-priority) shortfalls are listed
+        under the Supplies heading and kit-check banner.
+      </p>
+      <p>
+        A banner reminds you to review the kit about every six months — use{' '}
+        <strong>Mark checked today</strong> when you have rotated stock. Optional{' '}
+        <strong>local notifications</strong> (Household &amp; reminders panel)
+        can also surface kit-check and expiry reminders when you open the app.
+        They require an explicit opt-in and browser permission; behaviour depends
+        on the browser/OS. There is no push server.
       </p>
 
       <h2 id="contacts">Contacts and notes</h2>
@@ -126,9 +156,8 @@ export function HelpPage() {
         The side panels for <strong>Categories</strong>, <strong>Contacts</strong>,
         and <strong>Notes</strong> start collapsed — expand them when you need
         them. Contacts hold phone numbers and similar details. Notes are a list
-        you can add, edit, and delete (meeting points, radio frequencies,
-        medication summaries, and so on). Keep a paper copy somewhere easy to
-        find in a power cut.
+        you can add, edit, and delete. Keep a paper copy somewhere easy to find
+        in a power cut.
       </p>
 
       <h2 id="theme">Theme</h2>
@@ -137,32 +166,38 @@ export function HelpPage() {
         local data.
       </p>
 
-      <h2 id="import-export">Import, export, PDF, print</h2>
+      <h2 id="import-export">Import, export, backup, PDF, print</h2>
       <ul>
         <li>
-          <strong>Export JSON</strong> downloads your full app state (settings,
-          categories, items, contacts, notes).
+          <strong>Export JSON</strong> downloads your full app state and records
+          the export time for the backup reminder (about every 14 days).
+        </li>
+        <li>
+          <strong>Share / copy backup</strong> uses the system share sheet with a
+          file when available, otherwise copies JSON to the clipboard, otherwise
+          downloads. Full-kit QR codes are not practical (state is usually too
+          large); use JSON export/import or share to move between devices.
         </li>
         <li>
           <strong>Import JSON</strong> validates the file, downloads a backup of
           your current data, then replaces local state.
         </li>
         <li>
-          <strong>Export PDF</strong> creates a PDF of the items currently shown
-          (after filters), in the current sort order.
-        </li>
-        <li>
-          <strong>Print</strong> uses a print-friendly layout of the same table
-          (or Help/Advice pages).
+          <strong>Export PDF</strong> / <strong>Print</strong> cover the current
+          supplies view; Shopping and Grab bag have their own layouts.
         </li>
       </ul>
+      <p>
+        Clearing site data for this origin deletes your kit. Prefer regular
+        exports — see <Link to="/privacy">Privacy</Link>.
+      </p>
 
       <h2 id="pwa">Install and offline use</h2>
       <p>
         This app is a progressive web app: after you visit once, much of it
         works offline, and you can install it from your browser’s install or
         “Add to Home Screen” option. Your supply data never leaves this device
-        unless you export it.
+        unless you export or share it.
       </p>
     </article>
   );

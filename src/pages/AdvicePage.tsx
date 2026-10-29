@@ -1,5 +1,14 @@
+import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ADVICE_TOPICS, getTopic } from './advice/topics';
+import { useApp } from '../context/AppContext';
+import { slugId } from '../data/defaults';
+import { isProfileActive } from '../utils';
+import {
+  ADVICE_TOPICS,
+  getTopic,
+  topicMatchesProfile,
+  type AdviceTopic,
+} from './advice/topics';
 
 function Disclaimer() {
   return (
@@ -12,7 +21,31 @@ function Disclaimer() {
   );
 }
 
+function TopicCard({ topic, highlighted }: { topic: AdviceTopic; highlighted?: boolean }) {
+  return (
+    <Link
+      className={`topic-card ${highlighted ? 'topic-card-highlight' : ''}`}
+      to={`/advice/${topic.slug}`}
+    >
+      <h3>{topic.title}</h3>
+      <p>{topic.summary}</p>
+      {highlighted && <span className="badge ok">Suggested for your household</span>}
+    </Link>
+  );
+}
+
 export function AdviceIndexPage() {
+  const { state } = useApp();
+  const profileOn = isProfileActive(state.settings.profile);
+  const [onlySuggested, setOnlySuggested] = useState(false);
+
+  const topics = useMemo(() => {
+    if (!profileOn || !onlySuggested) return ADVICE_TOPICS;
+    return ADVICE_TOPICS.filter((t) =>
+      topicMatchesProfile(t, state.settings.profile),
+    );
+  }, [onlySuggested, profileOn, state.settings.profile]);
+
   return (
     <article className="prose panel">
       <h1>Advice</h1>
@@ -22,14 +55,30 @@ export function AdviceIndexPage() {
         <Link to="/">supplies list</Link> against the related categories, and see{' '}
         <Link to="/help">Help</Link> for how scaling and preseed work.
       </p>
+      {profileOn && (
+        <label className="check" style={{ marginBottom: '1rem' }}>
+          <input
+            type="checkbox"
+            checked={onlySuggested}
+            onChange={(e) => setOnlySuggested(e.target.checked)}
+          />
+          Show topics suggested for my household profile only
+        </label>
+      )}
       <div className="topic-grid">
-        {ADVICE_TOPICS.map((t) => (
-          <Link key={t.slug} className="topic-card" to={`/advice/${t.slug}`}>
-            <h3>{t.title}</h3>
-            <p>{t.summary}</p>
-          </Link>
+        {topics.map((t) => (
+          <TopicCard
+            key={t.slug}
+            topic={t}
+            highlighted={
+              profileOn && topicMatchesProfile(t, state.settings.profile)
+            }
+          />
         ))}
       </div>
+      {topics.length === 0 && (
+        <p className="muted">No topics match the current profile filter.</p>
+      )}
       <p className="muted">
         Further reading:{' '}
         <a
@@ -55,6 +104,7 @@ export function AdviceIndexPage() {
 export function AdviceTopicPage() {
   const { slug } = useParams();
   const topic = slug ? getTopic(slug) : undefined;
+  const { addScenarioSeed } = useApp();
 
   if (!topic) {
     return (
@@ -67,6 +117,11 @@ export function AdviceTopicPage() {
     );
   }
 
+  const related = topic.relatedCategories.map((name) => ({
+    name,
+    id: slugId(name),
+  }));
+
   return (
     <article className="prose panel">
       <p className="muted">
@@ -76,8 +131,32 @@ export function AdviceTopicPage() {
       <Disclaimer />
       <p>{topic.summary}</p>
       <p>
-        <strong>Related inventory categories:</strong>{' '}
-        {topic.relatedCategories.join(', ')}
+        <strong>Related inventory:</strong>{' '}
+        {related.map((r, i) => (
+          <span key={r.id}>
+            {i > 0 ? ', ' : ''}
+            <Link to={`/?category=${r.id}&filter=understocked`}>{r.name}</Link>
+          </span>
+        ))}
+      </p>
+      <p className="no-print">
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            const n = addScenarioSeed(topic.relatedCategories);
+            alert(
+              n > 0
+                ? `Added ${n} missing essential${n === 1 ? '' : 's'} for this scenario.`
+                : 'Your list already includes the seeded essentials for these categories.',
+            );
+          }}
+        >
+          Add missing essentials for this scenario
+        </button>{' '}
+        <Link className="btn" to="/?filter=understocked">
+          View understocked supplies
+        </Link>
       </p>
       {topic.sections.map((section) => (
         <section key={section.heading}>

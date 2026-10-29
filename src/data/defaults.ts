@@ -1,5 +1,9 @@
 import type { AppState, Category } from '../types';
-import { APP_STATE_VERSION } from '../types';
+import {
+  APP_STATE_VERSION,
+  DEFAULT_HOUSEHOLD_PROFILE,
+  DEFAULT_NOTIFICATION_PREFS,
+} from '../types';
 
 export const DEFAULT_CATEGORY_NAMES = [
   'Food',
@@ -37,6 +41,9 @@ export function createEmptyState(): AppState {
       days: 3,
       theme: 'system',
       lastCheckedAt: null,
+      lastExportedAt: null,
+      profile: { ...DEFAULT_HOUSEHOLD_PROFILE },
+      notifications: { ...DEFAULT_NOTIFICATION_PREFS },
     },
     categories: createDefaultCategories(),
     items: [],

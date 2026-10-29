@@ -15,6 +15,7 @@ const emptyDraft = (categoryId: string): Draft => ({
   notes: '',
   grabBag: false,
   priority: 'medium',
+  storageLocation: '',
 });
 
 type Props = {
@@ -169,6 +170,16 @@ export function ItemModal({ open, categories, initial, onClose, onSave }: Props)
               onChange={(e) => setDraft({ ...draft, grabBag: e.target.checked })}
             />
             Grab-bag item
+          </label>
+          <label>
+            Storage location
+            <input
+              value={draft.storageLocation}
+              onChange={(e) =>
+                setDraft({ ...draft, storageLocation: e.target.value })
+              }
+              placeholder="Cupboard, garage, car boot…"
+            />
           </label>
           <label style={{ gridColumn: '1 / -1' }}>
             Notes

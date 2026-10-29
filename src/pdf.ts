@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { AppState, SupplyItem } from './types';
-import { effectiveRequired, formatDate, todayIso } from './utils';
+import { effectiveRequired, formatDate, qtyNeeded, todayIso } from './utils';
 
 export type PdfRow = {
   item: SupplyItem;
@@ -42,6 +42,7 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
         'Required',
         'In stock',
         'Expiry',
+        'Location',
         'Grab bag',
         'Notes',
       ],
@@ -56,22 +57,24 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
             String(qtyRequired),
             String(item.qtyInStock),
             formatDate(item.expiryDate),
+            item.storageLocation || '',
             item.grabBag ? 'Yes' : '',
             item.notes,
           ])
-        : [['No items in current view', '', '', '', '', '', '', '', '']],
-    styles: { fontSize: 8, cellPadding: 1.5, overflow: 'linebreak' },
+        : [['No items in current view', '', '', '', '', '', '', '', '', '']],
+    styles: { fontSize: 7.5, cellPadding: 1.3, overflow: 'linebreak' },
     headStyles: { fillColor: [30, 90, 60] },
     columnStyles: {
-      0: { cellWidth: 36 },
-      1: { cellWidth: 24 },
-      2: { cellWidth: 16 },
-      3: { cellWidth: 14 },
-      4: { cellWidth: 16 },
-      5: { cellWidth: 16 },
-      6: { cellWidth: 20 },
-      7: { cellWidth: 14 },
-      8: { cellWidth: 'auto' },
+      0: { cellWidth: 32 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 14 },
+      3: { cellWidth: 12 },
+      4: { cellWidth: 14 },
+      5: { cellWidth: 14 },
+      6: { cellWidth: 18 },
+      7: { cellWidth: 22 },
+      8: { cellWidth: 12 },
+      9: { cellWidth: 'auto' },
     },
   });
 
@@ -117,6 +120,82 @@ export function exportItemsPdf(state: AppState, rows: PdfRow[]) {
   });
 
   doc.save(`emergency-supplies-${todayIso()}.pdf`);
+}
+
+export function exportShoppingPdf(state: AppState, rows: PdfRow[]) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' }) as JsPdfWithAutoTable;
+  const { people, days } = state.settings;
+
+  doc.setFontSize(16);
+  doc.text('Be Prepared — Shopping list', 14, 16);
+  doc.setFontSize(10);
+  doc.text(
+    `${people} people · ${days} days · ${todayIso()} · ${rows.length} items to buy`,
+    14,
+    22,
+  );
+
+  autoTable(doc, {
+    startY: 26,
+    head: [['Name', 'Category', 'Buy', 'Unit', 'Notes']],
+    body:
+      rows.length > 0
+        ? rows.map(({ item, categoryName }) => [
+            item.name,
+            categoryName,
+            String(qtyNeeded(item, people, days)),
+            item.unit,
+            item.notes,
+          ])
+        : [['Nothing to buy', '', '', '', '']],
+    styles: { fontSize: 9, cellPadding: 1.5, overflow: 'linebreak' },
+    headStyles: { fillColor: [30, 90, 60] },
+    columnStyles: {
+      0: { cellWidth: 45 },
+      1: { cellWidth: 28 },
+      2: { cellWidth: 16 },
+      3: { cellWidth: 16 },
+      4: { cellWidth: 'auto' },
+    },
+  });
+
+  doc.save(`emergency-shopping-${todayIso()}.pdf`);
+}
+
+export function exportGrabBagPdf(state: AppState, rows: PdfRow[]) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' }) as JsPdfWithAutoTable;
+  const { people, days } = state.settings;
+
+  doc.setFontSize(16);
+  doc.text('Be Prepared — Grab bag packing', 14, 16);
+  doc.setFontSize(10);
+  doc.text(`${people} people · ${days} days · ${todayIso()}`, 14, 22);
+
+  autoTable(doc, {
+    startY: 26,
+    head: [['Packed', 'Name', 'Stock / Req', 'Location', 'Notes']],
+    body:
+      rows.length > 0
+        ? rows.map(({ item, categoryName: _c, qtyRequired }) => [
+            '☐',
+            item.name,
+            `${item.qtyInStock} / ${qtyRequired}`,
+            item.storageLocation || '',
+            item.notes,
+          ])
+        : [['', 'No grab-bag items flagged', '', '', '']],
+    styles: { fontSize: 9, cellPadding: 1.5, overflow: 'linebreak' },
+    headStyles: { fillColor: [30, 90, 60] },
+    columnStyles: {
+      0: { cellWidth: 16 },
+      1: { cellWidth: 50 },
+      2: { cellWidth: 24 },
+      3: { cellWidth: 30 },
+      4: { cellWidth: 'auto' },
+    },
+  });
+
+  doc.save(`emergency-grab-bag-${todayIso()}.pdf`);
 }
 
 export function buildPdfRows(

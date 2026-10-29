@@ -1,13 +1,23 @@
-import { CheckCircle2, Moon, Monitor, Sun } from 'lucide-react';
+import { CheckCircle2, FileDown, Moon, Monitor, Sun } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { needsCheckReminder, readinessStats } from '../utils';
+import {
+  needsBackupReminder,
+  needsCheckReminder,
+  readinessStats,
+} from '../utils';
 import { IconButton } from './IconButton';
 
 export function Layout() {
-  const { state, setPeople, setDays, setTheme, markChecked } = useApp();
+  const { state, setPeople, setDays, setTheme, markChecked, exportJson } =
+    useApp();
   const stats = readinessStats(state);
   const remind = needsCheckReminder(state.settings.lastCheckedAt);
+  const backupDue = needsBackupReminder(state.settings.lastExportedAt);
+  const gapTitle =
+    stats.criticalGaps.length > 0
+      ? `Critical gaps: ${stats.criticalGaps.map((g) => g.name).join(', ')}`
+      : 'Weighted readiness (priority + grab-bag aware)';
 
   function cycleTheme() {
     const order = ['system', 'light', 'dark'] as const;
@@ -47,8 +57,11 @@ export function Layout() {
             <NavLink to="/" end>
               Supplies
             </NavLink>
+            <NavLink to="/shopping">Shopping</NavLink>
+            <NavLink to="/grab-bag">Grab bag</NavLink>
             <NavLink to="/help">Help</NavLink>
             <NavLink to="/advice">Advice</NavLink>
+            <NavLink to="/privacy">Privacy</NavLink>
           </nav>
 
           <div className="header-controls">
@@ -79,7 +92,7 @@ export function Layout() {
             />
             <span
               className={`chip ${stats.percent < 70 && stats.total > 0 ? 'warn' : ''}`}
-              title="Share of items with enough stock for N×M"
+              title={gapTitle}
             >
               Ready {stats.percent}%
             </span>
@@ -88,6 +101,24 @@ export function Layout() {
       </header>
 
       <main className="main">
+        {backupDue && (
+          <div className="banner banner-info no-print" role="status">
+            <div>
+              <strong>Backup reminder.</strong> Export your kit JSON every couple
+              of weeks (or after big edits). Clearing site data deletes local
+              storage.
+              {state.settings.lastExportedAt
+                ? ` Last export: ${new Date(state.settings.lastExportedAt).toLocaleDateString()}.`
+                : ' No export recorded yet.'}
+            </div>
+            <IconButton
+              label="Export JSON backup now"
+              icon={<FileDown size={18} />}
+              variant="primary"
+              onClick={exportJson}
+            />
+          </div>
+        )}
         {remind && (
           <div className="banner no-print" role="status">
             <div>
@@ -96,6 +127,9 @@ export function Layout() {
               {state.settings.lastCheckedAt
                 ? ` Last checked: ${new Date(state.settings.lastCheckedAt).toLocaleDateString()}.`
                 : ' Not checked yet.'}
+              {stats.criticalGaps.length > 0
+                ? ` High-priority gaps: ${stats.criticalGaps.map((g) => g.name).join(', ')}.`
+                : ''}
             </div>
             <IconButton
               label="Mark kit checked today"

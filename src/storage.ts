@@ -3,12 +3,19 @@ import type {
   AppState,
   Category,
   Contact,
+  HouseholdProfile,
   ItemPriority,
   Note,
+  NotificationPrefs,
   SupplyItem,
   ThemeMode,
 } from './types';
-import { APP_STATE_VERSION, STORAGE_KEY } from './types';
+import {
+  APP_STATE_VERSION,
+  DEFAULT_HOUSEHOLD_PROFILE,
+  DEFAULT_NOTIFICATION_PREFS,
+  STORAGE_KEY,
+} from './types';
 
 function parsePriority(v: unknown): ItemPriority {
   return v === 'high' || v === 'low' || v === 'medium' ? v : 'medium';
@@ -57,6 +64,7 @@ function parseItem(v: unknown): SupplyItem | null {
     notes: asString(v.notes),
     grabBag: asBoolean(v.grabBag),
     priority: parsePriority(v.priority),
+    storageLocation: asString(v.storageLocation),
   };
 }
 
@@ -78,6 +86,33 @@ function parseNote(v: unknown): Note | null {
     title: title || 'Note',
     body: asString(v.body),
     updatedAt: asString(v.updatedAt, new Date().toISOString()),
+  };
+}
+
+function parseProfile(raw: unknown): HouseholdProfile {
+  if (!isObject(raw)) return { ...DEFAULT_HOUSEHOLD_PROFILE };
+  return {
+    infants: asBoolean(raw.infants),
+    schoolAge: asBoolean(raw.schoolAge),
+    pets: asBoolean(raw.pets),
+    medical: asBoolean(raw.medical),
+  };
+}
+
+function parseNotifications(raw: unknown): NotificationPrefs {
+  if (!isObject(raw)) return { ...DEFAULT_NOTIFICATION_PREFS };
+  const lead = Math.max(
+    1,
+    Math.floor(asNumber(raw.expiringLeadDays, DEFAULT_NOTIFICATION_PREFS.expiringLeadDays)),
+  );
+  return {
+    enabled: asBoolean(raw.enabled, DEFAULT_NOTIFICATION_PREFS.enabled),
+    kitCheck: asBoolean(raw.kitCheck, DEFAULT_NOTIFICATION_PREFS.kitCheck),
+    expired: asBoolean(raw.expired, DEFAULT_NOTIFICATION_PREFS.expired),
+    expiring: asBoolean(raw.expiring, DEFAULT_NOTIFICATION_PREFS.expiring),
+    expiringLeadDays: lead,
+    lastNotifiedKey:
+      typeof raw.lastNotifiedKey === 'string' ? raw.lastNotifiedKey : null,
   };
 }
 
@@ -128,6 +163,12 @@ export function parseAppState(raw: unknown): AppState {
       theme: validTheme,
       lastCheckedAt:
         typeof settingsRaw.lastCheckedAt === 'string' ? settingsRaw.lastCheckedAt : null,
+      lastExportedAt:
+        typeof settingsRaw.lastExportedAt === 'string'
+          ? settingsRaw.lastExportedAt
+          : null,
+      profile: parseProfile(settingsRaw.profile),
+      notifications: parseNotifications(settingsRaw.notifications),
     },
     categories: categories.length > 0 ? categories : base.categories,
     items,

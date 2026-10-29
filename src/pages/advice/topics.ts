@@ -1,10 +1,24 @@
+import type { HouseholdProfile } from '../../types';
+
+export type AdviceProfileTag = 'infants' | 'schoolAge' | 'pets' | 'medical';
+
 export type AdviceTopic = {
   slug: string;
   title: string;
   summary: string;
   relatedCategories: string[];
+  /** When household profile is active, topics with matching tags are highlighted. */
+  profileTags?: AdviceProfileTag[];
   sections: { heading: string; paragraphs: string[]; bullets?: string[] }[];
 };
+
+export function topicMatchesProfile(
+  topic: AdviceTopic,
+  profile: HouseholdProfile,
+): boolean {
+  if (!topic.profileTags?.length) return false;
+  return topic.profileTags.some((tag) => profile[tag]);
+}
 
 export const ADVICE_TOPICS: AdviceTopic[] = [
   {
@@ -12,6 +26,7 @@ export const ADVICE_TOPICS: AdviceTopic[] = [
     title: 'No power',
     summary: 'Lighting, charging, food safety, information, and medical devices during an outage.',
     relatedCategories: ['Power', 'Heat+Light', 'Communications', 'Food'],
+    profileTags: ['medical'],
     sections: [
       {
         heading: 'Stay informed and lit',
@@ -43,6 +58,7 @@ export const ADVICE_TOPICS: AdviceTopic[] = [
     title: 'No water',
     summary: 'Stored drinking water, hygiene without mains supply, and what not to drink.',
     relatedCategories: ['Drinks', 'Hygiene'],
+    profileTags: ['pets', 'infants'],
     sections: [
       {
         heading: 'Drinking water targets',
@@ -95,6 +111,7 @@ export const ADVICE_TOPICS: AdviceTopic[] = [
     title: 'Summer and heat',
     summary: 'Hydration, cooling without power, medication, and sun protection.',
     relatedCategories: ['Drinks', 'Medical', 'Hygiene'],
+    profileTags: ['medical', 'infants', 'schoolAge'],
     sections: [
       {
         heading: 'Hydration and cooling',
@@ -121,6 +138,7 @@ export const ADVICE_TOPICS: AdviceTopic[] = [
     title: 'Winter and cold',
     summary: 'Layering, drafts, one-room living, and checking on others.',
     relatedCategories: ['Heat+Light', 'Food', 'Communications'],
+    profileTags: ['medical', 'infants', 'schoolAge'],
     sections: [
       {
         heading: 'When heating fails',
@@ -147,6 +165,7 @@ export const ADVICE_TOPICS: AdviceTopic[] = [
     title: 'Staying warm in winter',
     summary: 'A practical warmth-without-central-heating checklist.',
     relatedCategories: ['Heat+Light'],
+    profileTags: ['medical', 'infants'],
     sections: [
       {
         heading: 'Clothing and bedding',
