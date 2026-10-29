@@ -349,37 +349,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const json = exportStateJson(state);
         const filename = `emergency-supplies-${todayIso()}.json`;
         const blob = new Blob([json], { type: 'application/json' });
-        try {
-          if (navigator.share && navigator.canShare) {
-            const file = new File([blob], filename, { type: 'application/json' });
-            if (navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                files: [file],
-                title: 'Be Prepared backup',
-                text: 'Emergency supplies backup JSON',
-              });
-              setState((s) => ({
-                ...s,
-                settings: {
-                  ...s.settings,
-                  lastExportedAt: new Date().toISOString(),
-                },
-              }));
-              return { ok: true, method: 'share' };
-            }
-          }
-          if (navigator.clipboard?.writeText) {
-            await navigator.clipboard.writeText(json);
-            setState((s) => ({
-              ...s,
-              settings: {
-                ...s.settings,
-                lastExportedAt: new Date().toISOString(),
-              },
-            }));
-            return { ok: true, method: 'clipboard' };
-          }
-          downloadBlob(filename, blob);
+        const markExported = () => {
           setState((s) => ({
             ...s,
             settings: {
@@ -387,16 +357,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
               lastExportedAt: new Date().toISOString(),
             },
           }));
-          return { ok: true, method: 'download' };
-        } catch (e) {
-          if (e instanceof Error && e.name === 'AbortError') {
-            return { ok: false, error: 'Share cancelled' };
+        };
+
+        // Try Web Share first. If the OS rejects it (common NotAllowedError on
+        // desktop), fall through — do not treat that as a hard failure.
+        if (navigator.share && navigator.canShare) {
+          try {
+            const file = new File([blob], filename, { type: 'application/json' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: 'Be Prepared backup',
+                text: 'Emergency supplies backup JSON',
+              });
+              markExported();
+              return { ok: true, method: 'share' };
+            }
+          } catch (e) {
+            if (e instanceof Error && e.name === 'AbortError') {
+              return { ok: false, error: 'Share cancelled' };
+            }
+            // NotAllowedError / other share failures → try clipboard, then download
           }
-          return {
-            ok: false,
-            error: e instanceof Error ? e.message : 'Share failed',
-          };
         }
+
+        // Clipboard needs a secure context + recent user gesture. Prefer the
+        // synchronous ClipboardItem path so Safari keeps transient activation.
+        if (window.isSecureContext && navigator.clipboard) {
+          try {
+            if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
+              await navigator.clipboard.write([
+                new ClipboardItem({
+                  'text/plain': Promise.resolve(
+                    new Blob([json], { type: 'text/plain' }),
+                  ),
+                }),
+              ]);
+            } else if (navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(json);
+            } else {
+              throw new Error('Clipboard write unavailable');
+            }
+            markExported();
+            return { ok: true, method: 'clipboard' };
+          } catch {
+            // Fall through to download
+          }
+        }
+
+        downloadBlob(filename, blob);
+        markExported();
+        return { ok: true, method: 'download' };
       },
       resetAll: () => setState(createEmptyState()),
     }),

@@ -411,6 +411,10 @@ export function SuppliesPage() {
                 }
                 if (result.method === 'clipboard') {
                   alert('Backup JSON copied to the clipboard.');
+                } else if (result.method === 'download') {
+                  alert(
+                    'Share/clipboard were unavailable, so a JSON backup file was downloaded instead.',
+                  );
                 }
               }}
             />
